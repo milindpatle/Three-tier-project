@@ -1,0 +1,7 @@
+frontend:
+  image: "<REGISTRY>/bank-frontend:latest"
+backend:
+  image: "<REGISTRY>/bank-backend:latest"
+mongo:
+  user: "bankuser"
+  password: "bankpass"

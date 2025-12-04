@@ -1,0 +1,12 @@
+{
+  "name": "bank-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./node_modules/.bin/serve -s build -l 3000",
+    "build": "mkdir -p build && cp -r public/* build/ && cp -r src/* build/"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}

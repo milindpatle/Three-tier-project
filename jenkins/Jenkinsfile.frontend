@@ -1,0 +1,60 @@
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY = "${env.REGISTRY_URL ?: 'your-registry-url'}"
+    IMAGE = "${REGISTRY}/bank-frontend:${BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build Image') {
+      steps {
+        sh """
+          docker build -t bank-frontend ./frontend
+          docker tag bank-frontend ${IMAGE}
+        """
+      }
+    }
+
+    stage('Security Scan') {
+      steps {
+        sh """
+          trivy image --severity HIGH,CRITICAL --exit-code 1 ${IMAGE} || true
+        """
+      }
+    }
+
+    stage('Push Image') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'docker-reg-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+          sh """
+            echo "$PASS" | docker login -u "$USER" --password-stdin ${REGISTRY}
+            docker push ${IMAGE}
+          """
+        }
+      }
+    }
+
+    stage('Update k8s Manifests') {
+      steps {
+        sh """
+          git config user.email "jenkins@local"
+          git config user.name "jenkins"
+
+          # Update frontend image tag
+          sed -i "s|bank-frontend:.*|bank-frontend:${BUILD_NUMBER}|g" k8s/frontend/deployment.yaml
+
+          git add k8s/frontend/deployment.yaml
+          git commit -m "Update frontend image tag to ${BUILD_NUMBER}" || true
+          git push || true
+        """
+      }
+    }
+  }
+}

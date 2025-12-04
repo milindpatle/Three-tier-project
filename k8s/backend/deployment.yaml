@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: bank-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: milindpatle12/bank-backend:latest
+        env:
+        - name: MONGO_URI
+          value: "mongodb://bankuser:bankpass@mongo-0.mongo.bank-app.svc.cluster.local:27017/bankdb?authSource=admin"
+        ports:
+        - containerPort: 5000

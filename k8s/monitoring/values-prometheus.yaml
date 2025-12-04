@@ -1,0 +1,13 @@
+prometheus:
+  prometheusSpec:
+    retention: "12h"
+    routePrefix: /
+    
+grafana:
+  adminUser: admin
+  adminPassword: admin123
+  service:
+    type: LoadBalancer
+
+alertmanager:
+  enabled: false

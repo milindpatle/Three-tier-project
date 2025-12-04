@@ -1,0 +1,5 @@
+aws_region = "us-east-1"
+cluster_name = "bank-app-eks"
+node_instance_type = "t3.medium"
+desired_capacity = 2
+owner = "milind"
