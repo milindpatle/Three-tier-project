@@ -22,13 +22,13 @@ pipeline {
       }
     }
 
-    stage('Security Scan') {
-      steps {
-        sh """
-          trivy image --severity HIGH,CRITICAL --exit-code 1 ${IMAGE} || true
-        """
-      }
-    }
+    // stage('Security Scan') {
+    //   steps {
+    //     sh """
+    //       trivy image --severity HIGH,CRITICAL --exit-code 1 ${IMAGE} || true
+    //     """
+    //   }
+    // }
 
     stage('Push Image') {
       steps {

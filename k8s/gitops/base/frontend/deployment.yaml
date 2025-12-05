@@ -17,7 +17,7 @@ spec:
       - name: frontend
         image: milindpatle12/bank-frontend:latest
         env:
-        - name: BACKEND_URL
+        - name: REACT_APP_BACKEND_URL
           value: "http://backend-svc:5000"
         ports:
         - containerPort: 80
