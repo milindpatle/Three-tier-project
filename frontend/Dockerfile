@@ -10,6 +10,6 @@ FROM node:18-alpine
 WORKDIR /app
 COPY --from=builder /app/build /app/build
 RUN npm install -g serve
-ENV PORT=3000
-EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000"]
+ENV PORT=80
+EXPOSE 80
+CMD ["serve", "-s", "build", "-l", "80"]
