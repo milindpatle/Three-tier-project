@@ -30,9 +30,18 @@ spec:
             secretKeyRef:
               name: mongo-secret
               key: mongo-password
+        - name: MONGO_INITDB_DATABASE
+          value: "bankdb"
         volumeMounts:
         - name: mongo-data
           mountPath: /data/db
+        - name: mongo-init-script
+          mountPath: /docker-entrypoint-initdb.d/init-mongo.js
+          subPath: init-mongo.js
+      volumes:
+      - name: mongo-init-script
+        configMap:
+          name: mongo-init-script
   volumeClaimTemplates:
   - metadata:
       name: mongo-data
@@ -40,4 +49,4 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: 5Gi
+          storage: 1Gi  # Reduced from 5Gi to 1Gi

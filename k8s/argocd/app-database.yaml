@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/milindpatle/Three-tier-project.git'
+    repoURL: 'https://github.com/milindpatle/Three-Tier-Project.git'  # Fixed capital T
     targetRevision: HEAD
-    path: k8s/gitops/overlays/production
+    path: k8s/gitops/base/database
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: bank-app
@@ -17,4 +17,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true
