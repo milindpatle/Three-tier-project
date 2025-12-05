@@ -15,7 +15,7 @@ resources:
   # Database
   - database/secret.yaml
   - database/service.yaml 
-  - database/statefulset.yaml
+  - database/deployment.yaml
   - database/configMap.yaml
   # If you have PVC add this, else remove it:
   # - database/pvc.yaml
