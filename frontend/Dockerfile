@@ -1,14 +1,17 @@
-# Step 1: Build React app
+# Frontend Dockerfile
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+# Pass backend URL at build time
+ARG BACKEND_URL
+RUN REACT_APP_API_URL=$BACKEND_URL npm run build
 
-# Step 2: Serve with NGINX (production-grade)
 FROM nginx:alpine
-COPY public /usr/share/nginx/html   
-ENV BACKEND_URL=http://backend:5000
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+# Copy built files
+COPY --from=builder /app/build /usr/share/nginx/html
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-    
