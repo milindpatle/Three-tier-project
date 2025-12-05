@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  frontend.json: |-
+    {
+      "dashboard": {
+        "uid": "frontend-metrics",
+        "title": "Frontend Application",
+        "panels": [
+          {
+            "title": "Frontend Pod Status",
+            "type": "stat",
+            "targets": [{
+              "expr": "count(kube_pod_container_status_running{container=\"frontend\"})",
+              "legendFormat": "Running Pods"
+            }]
+          },
+          {
+            "title": "Frontend Memory Usage",
+            "type": "graph",
+            "targets": [{
+              "expr": "container_memory_working_set_bytes{container=\"frontend\"} / 1024 / 1024",
+              "legendFormat": "{{pod}}"
+            }]
+          },
+          {
+            "title": "HTTP Response Codes",
+            "type": "piechart",
+            "targets": [{
+              "expr": "sum by (status) (rate(http_requests_total{service=\"frontend\"}[5m]))",
+              "legendFormat": "{{status}}"
+            }]
+          },
+          {
+            "title": "Page Load Times",
+            "type": "graph",
+            "targets": [{
+              "expr": "frontend_page_load_seconds",
+              "legendFormat": "Load Time"
+            }]
+          }
+        ]
+      }
+    }

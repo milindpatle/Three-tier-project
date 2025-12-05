@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  mongodb.json: |-
+    {
+      "dashboard": {
+        "uid": "mongodb-metrics",
+        "title": "MongoDB Performance",
+        "panels": [
+          {
+            "title": "MongoDB Connections",
+            "type": "graph",
+            "targets": [{
+              "expr": "mongodb_connections_current",
+              "legendFormat": "Current"
+            }]
+          },
+          {
+            "title": "Query Operations",
+            "type": "graph",
+            "targets": [{
+              "expr": "rate(mongodb_opcounters_total[5m])",
+              "legendFormat": "{{type}}"
+            }]
+          },
+          {
+            "title": "Memory Usage",
+            "type": "gauge",
+            "targets": [{
+              "expr": "mongodb_memory_usage_bytes / 1024 / 1024",
+              "legendFormat": "MB Used"
+            }]
+          },
+          {
+            "title": "Replication Lag",
+            "type": "stat",
+            "targets": [{
+              "expr": "mongodb_replset_member_optime_lag",
+              "legendFormat": "Lag (seconds)"
+            }]
+          },
+          {
+            "title": "Disk Usage",
+            "type": "gauge",
+            "targets": [{
+              "expr": "mongodb_dbstats_dataSize / 1024 / 1024",
+              "legendFormat": "Data Size (MB)"
+            }]
+          }
+        ]
+      }
+    }

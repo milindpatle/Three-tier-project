@@ -1,0 +1,113 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: three-tier-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: backend-alerts
+    rules:
+    - alert: BackendHighLatency
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="backend"}[5m])) > 1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Backend API high latency"
+        description: "Backend 95th percentile latency is {{ $value }} seconds"
+    
+    - alert: BackendHighErrorRate
+      expr: rate(http_requests_total{service="backend", status=~"5.."}[5m]) / rate(http_requests_total{service="backend"}[5m]) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Backend high error rate"
+        description: "Backend error rate is {{ $value | humanizePercentage }}"
+    
+    - alert: BackendPodDown
+      expr: kube_pod_container_status_running{container="backend"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Backend pod is down"
+        description: "No backend pods are running"
+
+  - name: frontend-alerts
+    rules:
+    - alert: FrontendPodDown
+      expr: kube_pod_container_status_running{container="frontend"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Frontend pod is down"
+        description: "No frontend pods are running"
+    
+    - alert: FrontendHighMemory
+      expr: container_memory_working_set_bytes{container="frontend"} / (1024 * 1024) > 500
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Frontend high memory usage"
+        description: "Frontend using {{ $value }} MB of memory"
+
+  - name: mongodb-alerts
+    rules:
+    - alert: MongoDBDown
+      expr: up{job="mongodb-exporter"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MongoDB is down"
+        description: "MongoDB exporter is not responding"
+    
+    - alert: MongoDBHighConnections
+      expr: mongodb_connections_current > 500
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MongoDB high connections"
+        description: "MongoDB has {{ $value }} active connections"
+    
+    - alert: MongoDBReplicationLag
+      expr: mongodb_replset_member_optime_lag > 30
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MongoDB replication lag"
+        description: "MongoDB replication lag is {{ $value }} seconds"
+
+  - name: infrastructure-alerts
+    rules:
+    - alert: HighCPUUsage
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage on {{ $labels.instance }}"
+        description: "CPU usage is {{ $value }}%"
+    
+    - alert: HighMemoryUsage
+      expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage on {{ $labels.instance }}"
+        description: "Memory usage is {{ $value }}%"
+    
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[5m]) > 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod crash looping: {{ $labels.pod }}"
+        description: "Pod {{ $labels.pod }} is restarting frequently"
